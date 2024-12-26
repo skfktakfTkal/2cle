@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circumcenter Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input {
+            margin: 5px 0;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        #error {
+            margin-top: 20px;
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Circumcenter Calculator</h1>
+    <form id="circumcenterForm">
+        <label>Point 1 (x1, y1):</label>
+        <input type="number" id="x1" placeholder="x1" required>
+        <input type="number" id="y1" placeholder="y1" required>
+
+        <label>Point 2 (x2, y2):</label>
+        <input type="number" id="x2" placeholder="x2" required>
+        <input type="number" id="y2" placeholder="y2" required>
+
+        <label>Point 3 (x3, y3):</label>
+        <input type="number" id="x3" placeholder="x3" required>
+        <input type="number" id="y3" placeholder="y3" required>
+
+        <button type="button" onclick="calculateCircumcenter()">Calculate</button>
+    </form>
+
+    <div id="result"></div>
+    <div id="error"></div>
+
+    <script>
+        function calculateCircumcenter() {
+            const x1 = parseFloat(document.getElementById('x1').value);
+            const y1 = parseFloat(document.getElementById('y1').value);
+            const x2 = parseFloat(document.getElementById('x2').value);
+            const y2 = parseFloat(document.getElementById('y2').value);
+            const x3 = parseFloat(document.getElementById('x3').value);
+            const y3 = parseFloat(document.getElementById('y3').value);
+
+            const resultDiv = document.getElementById('result');
+            const errorDiv = document.getElementById('error');
+            resultDiv.textContent = '';
+            errorDiv.textContent = '';
+
+            try {
+                // Midpoints
+                const mid1X = (x1 + x2) / 2;
+                const mid1Y = (y1 + y2) / 2;
+                const mid2X = (x2 + x3) / 2;
+                const mid2Y = (y2 + y3) / 2;
+
+                // Slopes
+                const slope1 = x2 !== x1 ? (y2 - y1) / (x2 - x1) : null;
+                const slope2 = x3 !== x2 ? (y3 - y2) / (x3 - x2) : null;
+
+                // Perpendicular slopes
+                const perpSlope1 = slope1 !== null && slope1 !== 0 ? -1 / slope1 : null;
+                const perpSlope2 = slope2 !== null && slope2 !== 0 ? -1 / slope2 : null;
+
+                // Perpendicular bisector equations
+                const line1 = (perpSlope1 === null) ? { vertical: true, x: mid1X } : { slope: perpSlope1, intercept: mid1Y - perpSlope1 * mid1X };
+                const line2 = (perpSlope2 === null) ? { vertical: true, x: mid2X } : { slope: perpSlope2, intercept: mid2Y - perpSlope2 * mid2X };
+
+                let cx, cy;
+
+                // Find intersection
+                if (line1.vertical) {
+                    cx = line1.x;
+                    cy = line2.slope * cx + line2.intercept;
+                } else if (line2.vertical) {
+                    cx = line2.x;
+                    cy = line1.slope * cx + line1.intercept;
+                } else if (line1.slope === line2.slope) {
+                    throw new Error("The points are collinear; circumcenter cannot be calculated.");
+                } else {
+                    cx = (line2.intercept - line1.intercept) / (line1.slope - line2.slope);
+                    cy = line1.slope * cx + line1.intercept;
+                }
+
+                resultDiv.textContent = `The circumcenter is at: (${cx.toFixed(2)}, ${cy.toFixed(2)})`;
+            } catch (error) {
+                errorDiv.textContent = error.message;
+            }
+        }
+    </script>
+</body>
+</html>
